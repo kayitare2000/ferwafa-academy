@@ -33,10 +33,19 @@ if (isset($_POST['Submit'])) {
     $check = getimagesize($_FILES["Photo"]["tmp_name"]);
     $photo_name = $_FILES["Photo"]["name"];
 
+	if($NID=='')
+	{
+		$query_db = "SELECT * FROM children WHERE Telephone = $Telephone";
+		$stmt = $con->prepare($query_db);
+	}
+	else
+	{
+		$query_db = "SELECT * FROM children WHERE NID = ? OR Telephone = ?";
+		$stmt = $con->prepare($query_db);
+		$stmt->bind_param("ss", $NID, $Telephone);  
+	}
 
-	$query_db = "SELECT * FROM children WHERE NID = ? OR Telephone = ?";
-	$stmt = $con->prepare($query_db);
-	$stmt->bind_param("ss", $NID, $Telephone);
+
 	$stmt->execute();
 	$result_set = $stmt->get_result();
 	$result_nums = $result_set->num_rows;
@@ -53,16 +62,18 @@ if (isset($_POST['Submit'])) {
 			}
 	
 			if (move_uploaded_file($_FILES["Photo"]["tmp_name"], $target_file)) {
-				$sql = "INSERT INTO children (FirstName, LastName, FathersName, MothersName, DOB, AgeCategory, NID, Address, Position, Academy, Telephone, Season, Gender, Photo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-				$stmt = $con->prepare($sql);
-				if ($stmt) {
-					$stmt->bind_param("ssssssssssssss", $FirstName, $LastName, $FathersName, $MothersName, $DOB, $AgeCategory, $NID, $Address, $Position, $Academy, $Telephone, $Season, $Gender, $target_file);
-					if ($stmt->execute()) {
+			//	$sql = "INSERT INTO children (FirstName, LastName, FathersName, MothersName, DOB, AgeCategory, NID, Address, Position, Academy, Telephone, Season, Gender, Photo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				$sql = "INSERT INTO children VALUES ('','$FirstName', '$LastName', '$FathersName', '$MothersName', $DOB, '$AgeCategory', '$NID', '$Address', '$Position', '$Academy', '$Telephone', '$Season', '$Gender', '$target_file','')";
+
+				$stmt1 = $con->prepare($sql); 
+				if ($stmt1) {
+					//$stmt1->bind_param("ssssssssssssss", $FirstName, $LastName, $FathersName, $MothersName, $DOB, $AgeCategory, $NID, $Address, $Position, $Academy, $Telephone, $Season, $Gender, $target_file);
+					if ($stmt1->execute()) {
 						echo "<script type='text/javascript'>alert('Player Registered Successfully!'); location='academypage.php'; </script>";
 					} else {
-						echo "Error executing SQL query: " . $stmt->error;
+						echo "Error executing SQL query: " . $stmt1->error;
 					}
-					$stmt->close();
+					$stmt1->close(); 
 				} else {
 					echo "Error preparing SQL statement: " . $con->error;
 				}
@@ -71,7 +82,7 @@ if (isset($_POST['Submit'])) {
 			}
 		}
 	} else {
-		echo "<script type='text/javascript'>alert('Player Information already exists, please check details and try again'); location='academyplayerregistration.php';</script>";
+		echo "<script type='text/javascript'>alert('Player NID or Telephone Information already exists, please check details and try again'); location='academyplayerregistration.php';</script>";
 	}
 	
     
@@ -166,7 +177,7 @@ if (isset($_POST['Submit'])) {
 					     <option value="Defender"> Defender </option>
 					     <option value="Midfield"> Midfielder </option>
 					 </select>
-					 <label>FERWAFA DEVELOPMENT: </label>
+					 <label>APR Football Center : </label>
 					 <select class="form-control" name="Academy" required>
 					     <option value='<?php echo $_SESSION['AcademyName']; ?>' > <?php echo $_SESSION['AcademyName']; ?> </option>
 					     
@@ -233,7 +244,7 @@ if (isset($_POST['Submit'])) {
 			
 			<div class="tg-footerbar">
 				<div class="container">
-					<span class="tg-copyright"><a target="_blank" href="">FERWAFA DEVELOPMENT</a></span>
+					<span class="tg-copyright"><a target="_blank" href="https://www.victorhugobisangwa.com">APR FOOTBAL CENTER</a></span>
 					
 				</div>
 			</div>
