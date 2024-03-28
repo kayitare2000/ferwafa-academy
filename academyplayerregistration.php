@@ -244,7 +244,7 @@ if (isset($_POST['Submit'])) {
 			
 			<div class="tg-footerbar">
 				<div class="container">
-					<span class="tg-copyright"><a target="_blank" href="https://www.victorhugobisangwa.com">APR FOOTBAL CENTER</a></span>
+					<span class="tg-copyright"><a target="_blank" href="">FERWAFA DEVELOPMENT</a></span>
 					
 				</div>
 			</div>
