@@ -30,42 +30,56 @@ if (isset($_POST['Submit'])) {
   $Gender = stripslashes(mysqli_real_escape_string($con,$_POST['Gender']));
   $AgeCategory = stripslashes(mysqli_real_escape_string($con,$_POST['AgeCategory']));
     
-    $check = getimagesize($_FILES["Photo"]["tmp_name"]);
-    $photo_name = $_FILES["Photo"]["name"];
+    $check = getimagesize($_FILES["Photo"]["tmp_name"]); 
+    $photo_name = $_FILES["Photo"]["name"];    
+
+	if($NID=='')
+	{
+		$query_db = "SELECT * FROM children WHERE  Telephone = ?";
+		$stmt = $con->prepare($query_db);
+		$stmt->bind_param("s", $Telephone);
+	}
+	else
+	{
+		$query_db = "SELECT * FROM children WHERE NID = ? OR Telephone = ?";
+		$stmt = $con->prepare($query_db);
+		$stmt->bind_param("ss", $NID, $Telephone);  
+	}
     
-	$query_db = "SELECT * FROM children WHERE NID = ? OR Telephone = ?";
-	$stmt = $con->prepare($query_db);
-	$stmt->bind_param("ss", $NID, $Telephone);
+	
 	$stmt->execute();
 	$result_set = $stmt->get_result();
 	$result_nums = $result_set->num_rows;
 	
-	if ($result_nums < 1) {
+	if ($result_nums == 0) {
 		if ($_FILES["Photo"]["size"] > 5000000) {
 			echo "<script>alert('Image is too large')</script>";
-			exit; // Exit script execution if file size exceeds the limit
+			exit; 
 		} else {
 			$imageFileType = strtolower(pathinfo($_FILES["Photo"]["name"], PATHINFO_EXTENSION));
 			if (!in_array($imageFileType, ["jpg", "jpeg", "png", "gif"])) {
 				echo "<script>alert('Only JPG, JPEG, PNG, GIF files are allowed')</script>";
-				exit; // Exit script execution if file type is not allowed
+				exit; 
 			}
 	
 			if (move_uploaded_file($_FILES["Photo"]["tmp_name"], $target_file)) {
-				$sql = "INSERT INTO children VALUES (' ',?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-				$stmt = $con->prepare($sql);
-				$stmt->bind_param("ssssssssssssss", $FirstName, $LastName, $FathersName, $MothersName, $DOB, $AgeCategory, $NID, $Address, $Position, $Academy, $Telephone, $Season, $Gender, $target_file);
-				if ($stmt->execute()) {
-					echo "<script type='text/javascript'>alert('Player Registered Successfully!'); location='players_through_admin.php';</script>";
-				} else {
-					echo "Error: " . $sql . "<br>" . $con->error;
-				}
+				$sql = "INSERT INTO children VALUES ('','$FirstName', '$LastName', '$FathersName', '$MothersName', $DOB, '$AgeCategory', '$NID', '$Address', '$Position', '$Academy', '$Telephone', '$Season', '$Gender', '$target_file','')";
+$stmt1 = $con->prepare($sql);
+if (!$stmt1) {
+    die('Error in preparing statement: ' . mysqli_error($con));
+}
+
+if ($stmt1->execute()) {
+    echo "<script type='text/javascript'>alert('Player Registered Successfully!'); location='players_through_admin.php';</script>";
+} else {
+    echo "Error in executing statement: " . $stmt1->error;
+}
 			} else {
 				echo "Error uploading file";
 			}
 		}
 	} else {
-		echo "<script type='text/javascript'>alert('Player Information already exists, please check details and try again'); location='player_registration.php';</script>";
+		echo "<script type='text/javascript'>alert('Player NID or Telephone  Information already exists, please check details and try again'); location='player_registration.php';</script>";
 	}
 	
 }
@@ -233,7 +247,7 @@ if (isset($_POST['Submit'])) {
 			
 			<div class="tg-footerbar">
 				<div class="container">
-					<span class="tg-copyright"><a target="_blank" href="">FERWAFA DEVELOPMENT</a></span>
+					<span class="tg-copyright"><a target="_blank" href="https://www.victorhugobisangwa.com">APR FOOTBAL CENTER</a></span>
 					
 				</div>
 			</div>
